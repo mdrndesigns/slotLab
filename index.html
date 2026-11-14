@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SLOTLAB</title>
+<style>
+  :root{
+    --blue:#0000FF;
+    --black:#000000;
+    --white:#FFFFFF;
+    --hair:0.5px solid #000;
+    --rule:1px solid #000;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    background:var(--white); color:var(--black);
+    font-size:11px; line-height:1.35;
+    -webkit-font-smoothing:antialiased;
+    display:grid; grid-template-columns:330px 1fr; height:100vh;
+  }
+
+  /* ---------- control column ---------- */
+  #panel{border-right:var(--rule); overflow-y:auto; display:flex; flex-direction:column}
+  #brand{
+    padding:14px 16px 12px; border-bottom:var(--rule);
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  #brand h1{font-size:15px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase}
+  #brand span{font-size:9px; letter-spacing:0.18em; text-transform:uppercase}
+
+  .group{border-bottom:var(--rule); padding:12px 16px 14px}
+  .group > h2{
+    font-size:9px; font-weight:700; letter-spacing:0.2em;
+    text-transform:uppercase; margin-bottom:10px;
+  }
+  .group.hidden{display:none}
+
+  .ctl{margin-bottom:11px}
+  .ctl:last-child{margin-bottom:0}
+  .ctl.hidden{display:none}
+  .ctl .row{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px}
+  .ctl label{font-size:10px; letter-spacing:0.06em; text-transform:uppercase}
+  .ctl output{
+    font-size:10px; font-weight:700; font-variant-numeric:tabular-nums;
+    color:var(--blue);
+  }
+
+  input[type=range]{
+    -webkit-appearance:none; appearance:none;
+    width:100%; height:11px; background:transparent; display:block; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:1px; background:var(--black)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; appearance:none;
+    width:9px; height:9px; margin-top:-4px;
+    background:var(--blue); border:none; border-radius:0;
+  }
+  input[type=range]::-moz-range-track{height:1px; background:var(--black)}
+  input[type=range]::-moz-range-thumb{
+    width:9px; height:9px; background:var(--blue); border:none; border-radius:0;
+  }
+
+  .seg{display:grid; grid-auto-flow:column; grid-auto-columns:1fr; border:var(--rule); margin-bottom:11px}
+  .seg.hidden{display:none}
+  .seg button{
+    border:none; border-right:var(--hair); border-radius:0; background:var(--white);
+    color:var(--black); padding:6px 0; font-family:inherit; font-size:9px; font-weight:700;
+    letter-spacing:0.08em; text-transform:uppercase; cursor:pointer;
+  }
+  .seg button:last-child{border-right:none}
+  .seg button.on{background:var(--blue); color:var(--white)}
+  .seg button:hover:not(.on){background:#eee}
+  .seg button.dim{color:#999}
+  .seg.wrap{grid-auto-flow:row; grid-template-columns:repeat(3,1fr); border-bottom:none}
+  .seg.wrap button{border-bottom:var(--hair)}
+  .seg.wrap button:nth-child(3n){border-right:none}
+  textarea.txt{
+    width:100%; border:var(--rule); border-radius:0; background:transparent; font-family:inherit;
+    font-size:11px; letter-spacing:0.04em; padding:5px 6px; margin-bottom:8px; resize:vertical; display:block;
+  }
+  textarea.txt:focus{outline:none; border-color:var(--blue); color:var(--blue)}
+  input[type=file]{font-size:9px; width:100%; margin-bottom:6px; font-family:inherit}
+  button.act{
+    width:100%; padding:8px; border:var(--rule); border-radius:0; background:var(--white); color:var(--black);
+    font-family:inherit; font-size:9px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase;
+    cursor:pointer; margin-bottom:11px; display:block;
+  }
+  button.act:hover{background:var(--blue); color:var(--white); border-color:var(--blue)}
+  button.act.hidden{display:none}
+  .box-hidden{display:none}
+  .seglabel{font-size:9px; letter-spacing:0.16em; text-transform:uppercase; margin:0 0 4px}
+  .seglabel.hidden{display:none}
+
+  .toggle{display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; margin-bottom:11px}
+  .toggle.hidden{display:none}
+  .toggle .box{width:11px; height:11px; border:1px solid var(--black); flex:0 0 auto}
+  .toggle input{display:none}
+  .toggle input:checked + .box{background:var(--blue); border-color:var(--blue)}
+  .toggle span{font-size:10px; letter-spacing:0.06em; text-transform:uppercase}
+
+  select.pick{
+    width:100%; border:var(--rule); border-radius:0; background:var(--white); font-family:inherit;
+    font-size:10px; letter-spacing:0.04em; padding:6px 6px; appearance:none; -webkit-appearance:none;
+    margin-bottom:8px; cursor:pointer;
+  }
+  select.pick:focus{outline:none; color:var(--blue)}
+  .note{font-size:9px; letter-spacing:0.04em; line-height:1.5; margin-bottom:10px}
+  .note b{color:var(--blue)}
+  .note.hidden{display:none}
+
+  /* ---------- export ---------- */
+  #export{padding:12px 16px 16px; margin-top:auto}
+  #name{
+    width:100%; border:none; border-bottom:var(--rule); padding:4px 0 5px;
+    font-family:inherit; font-size:11px; letter-spacing:0.06em;
+    background:transparent; margin-bottom:10px; border-radius:0;
+  }
+  #name:focus{outline:none; border-bottom-color:var(--blue); color:var(--blue)}
+  #go{
+    width:100%; padding:11px; border:none; border-radius:0; cursor:pointer;
+    background:var(--blue); color:var(--white);
+    font-family:inherit; font-size:10px; font-weight:700;
+    letter-spacing:0.18em; text-transform:uppercase;
+  }
+  #go:hover{background:var(--black)}
+  #hint{margin-top:7px; font-size:9px; letter-spacing:0.04em; line-height:1.5}
+
+  /* ---------- viewport ---------- */
+  #stage{position:relative; overflow:hidden}
+  #canvas{display:block; width:100%; height:100%}
+
+  #readout{
+    position:absolute; top:0; left:0; right:0;
+    border-bottom:var(--rule); background:var(--white);
+    display:grid; grid-template-columns:repeat(7,1fr);
+  }
+  #readout div{padding:9px 12px; border-right:var(--hair); min-width:0}
+  #readout div:last-child{border-right:none}
+  #readout dt{font-size:8px; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:3px;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #readout dd{font-size:11px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--blue);
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #readout dd.warn{color:var(--black); text-decoration:underline}
+
+  #status{
+    position:absolute; left:0; bottom:0; right:0;
+    border-top:var(--rule); background:var(--white);
+    padding:7px 12px; font-size:9px; letter-spacing:0.12em; text-transform:uppercase;
+    display:grid; grid-template-columns:1fr auto; column-gap:16px; row-gap:3px;
+  }
+  #err{color:var(--blue); font-weight:700; text-align:right; max-width:50vw}
+  #limit{grid-column:1 / -1; letter-spacing:0.06em; text-transform:none; border-top:var(--hair); padding-top:4px}
+  .busy{animation:blink 0.7s steps(2,start) infinite}
+  @keyframes blink{to{opacity:0.25}}
+</style>
+</head>
+<body>
+
+<div id="panel">
+  <div id="brand"><h1>Slotlab</h1><span>T-slot hardware</span></div>
+
+  <div class="group">
+    <h2>Profile</h2>
+    <select class="pick" id="profile"></select>
+    <div class="note" id="profile-note"></div>
+    <div id="g-profile"></div>
+  </div>
+
+  <div class="group">
+    <h2>Material · fit</h2>
+    <div class="seg" id="seg-material"></div>
+    <div id="g-fit"></div>
+  </div>
+
+  <div class="group">
+    <h2>Part</h2>
+    <div class="seg wrap" id="seg-family"></div>
+    <div class="seglabel">Bolt / thread</div>
+    <div class="seg" id="seg-thread"></div>
+    <div class="note" id="thread-note"></div>
+  </div>
+
+  <div class="group fam" id="grp-tnut">
+    <h2>T-nut</h2>
+    <div class="seg" id="seg-tntype"></div>
+    <div class="seglabel">Fastening</div>
+    <div class="seg" id="seg-fix"></div>
+    <div class="seg" id="seg-nut"></div>
+    <div class="seglabel" id="lbl-load">Nut enters from</div>
+    <div class="seg" id="seg-load"></div>
+    <label class="toggle" id="tg-threadprev">
+      <input type="checkbox" id="tn_thread_preview"><span class="box"></span><span>Render thread in preview (slower)</span>
+    </label>
+    <div id="g-tnut"></div>
+  </div>
+
+  <div class="group fam" id="grp-joint">
+    <h2 id="h-joint">Joint</h2>
+    <div class="seglabel" id="lbl-poly">Regular polygon → interior angle</div>
+    <div class="seg" id="seg-poly"></div>
+    <div id="g-angle"></div>
+    <div class="note" id="poly-note"></div>
+    <div class="seglabel" id="lbl-ends">Member ends</div>
+    <div class="seg" id="seg-ends"></div>
+    <div id="g-joint"></div>
+  </div>
+
+  <div class="group fam" id="grp-holes">
+    <h2>Bolts</h2>
+    <div id="g-holes"></div>
+    <label class="toggle"><input type="checkbox" id="cbore"><span class="box"></span><span>Counterbore (socket head)</span></label>
+    <div id="g-cbore"></div>
+    <label class="toggle"><input type="checkbox" id="tongue"><span class="box"></span><span>Slot tongue (shear + alignment)</span></label>
+    <div id="g-tongue"></div>
+  </div>
+
+  <div class="group fam" id="grp-plate"><h2>Plate</h2><div id="g-plate"></div></div>
+
+  <div class="group fam" id="grp-elbow">
+    <h2>Elbow</h2>
+    <div class="seglabel">Third arm (Z)</div>
+    <div class="seg" id="seg-zarm"></div>
+    <label class="toggle"><input type="checkbox" id="keys"><span class="box"></span><span>Slot keys on the end faces</span></label>
+    <div id="g-elbow"></div>
+  </div>
+
+  <div class="group fam" id="grp-bracket">
+    <h2>Bracket</h2>
+    <div class="seglabel">Web</div>
+    <div class="seg" id="seg-web"></div>
+    <div class="seglabel">Slot notch under the legs</div>
+    <div class="seg" id="seg-notch"></div>
+    <div class="seglabel">Rotate about the corner</div>
+    <div class="seg" id="seg-rot"></div>
+    <div id="g-bracket"></div>
+  </div>
+
+  <div class="group fam" id="grp-cap">
+    <h2>End cap</h2>
+    <div class="seglabel">Outer edge</div>
+    <div class="seg" id="seg-capedge"></div>
+    <div class="seglabel">Slot plugs</div>
+    <div class="seg" id="seg-capplug"></div>
+    <label class="toggle"><input type="checkbox" id="cap_core"><span class="box"></span><span>Core plug (centre bore)</span></label>
+    <div class="seglabel">Centre bolt hole (into the tapped core)</div>
+    <div class="seg" id="seg-caphole"></div>
+    <div id="g-cap"></div>
+  </div>
+
+  <div class="group fam" id="grp-acc">
+    <h2>Accessory</h2>
+    <div class="seg wrap" id="seg-acctype"></div>
+    <div class="seglabel">Head faces</div>
+    <div class="seg" id="seg-accturn"></div>
+    <div class="seglabel" id="lbl-accwire">Wire</div>
+    <div class="seg" id="seg-accwire"></div>
+    <div class="seg" id="seg-accclip"></div>
+    <div class="note" id="acc-note"></div>
+    <div id="g-acc"></div>
+  </div>
+
+  <div class="group fam" id="grp-sign">
+    <h2>Sign</h2>
+    <div class="seglabel">Mount</div>
+    <div class="seg" id="seg-sgmount"></div>
+    <div class="seglabel" id="lbl-sgholes">Bolt holes</div>
+    <div class="seg" id="seg-sgholes"></div>
+    <div class="seglabel" id="lbl-sgwhere">Holes at</div>
+    <div class="seg" id="seg-sgwhere"></div>
+    <div class="seglabel">Edge</div>
+    <div class="seg" id="seg-sgedge"></div>
+    <div class="seglabel">Border lip on the face</div>
+    <div class="seg" id="seg-sglip"></div>
+    <div id="g-sign"></div>
+  </div>
+
+  <div class="group fam" id="grp-brand">
+    <h2>Branding</h2>
+    <div class="seg" id="seg-brandsrc"></div>
+    <div id="brand-text-box">
+      <textarea class="txt" id="brand_text" rows="2" spellcheck="false" placeholder="Text, one line per row"></textarea>
+      <select class="pick" id="brand_font"></select>
+      <label class="toggle"><input type="checkbox" id="brand_bold"><span class="box"></span><span>Bold</span></label>
+    </div>
+    <div id="brand-svg-box">
+      <input type="file" id="brand_file" accept=".svg,image/svg+xml">
+      <div class="note" id="svg-note">No SVG loaded. Filled outlines only: convert strokes and text to paths first.</div>
+    </div>
+    <div class="seglabel" id="lbl-brandmode">Finish</div>
+    <div class="seg" id="seg-brandmode"></div>
+    <label class="toggle" id="tg-dual"><input type="checkbox" id="brand_dual"><span class="box"></span><span>Two filaments: branding as its own part</span></label>
+    <div class="note" id="dual-note"></div>
+    <div id="g-brand"></div>
+    <div class="seglabel" id="lbl-brandalign">Placement on the sign</div>
+    <div class="seg" id="seg-brandalign"></div>
+    <button class="act" id="brand-centre">Centre on the plate · reset X / Y</button>
+    <div id="g-brand2"></div>
+  </div>
+
+  <div class="group fam" id="grp-splice">
+    <h2>Splice</h2>
+    <div class="seg" id="seg-spkind"></div>
+    <div class="seglabel" id="lbl-spfaces">Faces covered</div>
+    <div class="seg" id="seg-spfaces"></div>
+    <div class="seglabel" id="lbl-spfix">Grub screw seat</div>
+    <div class="seg" id="seg-spfix"></div>
+    <div class="seg" id="seg-spnut"></div>
+    <div class="note" id="splice-note"></div>
+    <div id="g-splice"></div>
+  </div>
+
+  <div class="group fam" id="grp-pivot">
+    <h2>Pivot</h2>
+    <div class="seglabel">Show</div>
+    <div class="seg" id="seg-pvpart"></div>
+    <div class="seglabel">Lock</div>
+    <div class="seg" id="seg-pvlock"></div>
+    <div class="seglabel">Nut under lug A</div>
+    <div class="seg" id="seg-pvnut"></div>
+    <div class="note" id="pivot-note"></div>
+    <div id="g-pivot"></div>
+  </div>
+
+  <div class="group">
+    <h2>View</h2>
+    <label class="toggle"><input type="checkbox" id="showctx" checked><span class="box"></span><span>Show extrusions</span></label>
+    <div id="g-view"></div>
+  </div>
+
+  <div id="export">
+    <input id="name" value="part" spellcheck="false" placeholder="filename">
+    <button id="go">Export files</button>
+    <div id="hint">ZIP: STEP + STL + 3MF, parameters, spec, script. Two filaments: 3MF with two parts + one STL per part.</div>
+  </div>
+</div>
+
+<div id="stage">
+  <dl id="readout">
+    <div><dt>Envelope</dt><dd id="r-env">—</dd></div>
+    <div><dt id="l-1">·</dt><dd id="r-1">—</dd></div>
+    <div><dt id="l-2">·</dt><dd id="r-2">—</dd></div>
+    <div><dt id="l-3">·</dt><dd id="r-3">—</dd></div>
+    <div><dt id="l-4">·</dt><dd id="r-4">—</dd></div>
+    <div><dt id="l-5">·</dt><dd id="r-5">—</dd></div>
+    <div><dt>Volume</dt><dd id="r-vol">—</dd></div>
+  </dl>
+  <canvas id="canvas"></canvas>
+  <div id="status"><span id="msg">Loading kernel…</span><span id="err"></span><span id="limit"></span></div>
+</div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+/* ---------- slider definitions: [key, label, min, max, step, group] ---------- */
+const CONTROLS = [
+  ['size','Profile size',15,60,0.5,'g-profile'],
+  ['opening','Slot opening',4,12,0.05,'g-profile'],
+  ['lip','Lip thickness (0 = open channel, no lips)',0,5,0.05,'g-profile'],
+  ['cavity_w','Cavity width',8,26,0.1,'g-profile'],
+  ['cavity_d','Cavity depth',2,14,0.1,'g-profile'],
+  ['core','Core bore Ø',3,14,0.1,'g-profile'],
+  ['corner_r','Corner radius',0,5,0.1,'g-profile'],
+  ['v_chamfer','V-slot lip bevel',0,3,0.1,'g-profile'],
+  ['floor_ch','Cavity floor chamfer',0,2,0.1,'g-profile'],
+
+  ['clear_hex','Hex pocket, across flats',0,0.6,0.05,'g-fit'],
+  ['clear_depth','Pocket depth / head height',0,0.6,0.05,'g-fit'],
+  ['clear_wide','Head width in cavity',0,0.8,0.05,'g-fit'],
+  ['clear_neck','Neck / tongue / key width',0,0.5,0.05,'g-fit'],
+  ['clear_hole','Bolt hole, added to ISO 273',0,0.5,0.05,'g-fit'],
+  ['clear_thread','Printed thread, radial',0,0.5,0.05,'g-fit'],
+
+  ['tn_len','Length',6,60,0.5,'g-tnut'],
+  ['tn_holes','Holes',1,4,1,'g-tnut'],
+  ['tn_pitch','Hole pitch (0 = even)',0,40,0.5,'g-tnut'],
+  ['tn_neck','Neck height',0,5,0.1,'g-tnut'],
+  ['tn_neck_len','Neck length (0 = full)',0,60,0.5,'g-tnut'],
+  ['tn_lead','End chamfer',0,2,0.1,'g-tnut'],
+  ['tn_boss','Centring boss height',0,3,0.1,'g-tnut'],
+  ['tn_floor','Floor under nut (end-loaded)',0.6,3,0.1,'g-tnut'],
+  ['tn_corner_r','Hex corner radius',0,1,0.1,'g-tnut'],
+  ['tn_retain','Snap lip at pocket mouth',0,0.5,0.05,'g-tnut'],
+  ['tn_insert_len','Insert length (0 = auto)',0,14,0.1,'g-tnut'],
+
+  ['angle','Interior angle',20,180,0.5,'g-angle'],
+  ['member_len','Member stub (view)',20,150,5,'g-joint'],
+  ['thick','Thickness',3,12,0.5,'g-joint'],
+  ['width','Width (0 = profile)',0,60,0.5,'g-joint'],
+  ['leg','Leg length (0 = auto)',0,150,1,'g-joint'],
+  ['holes','Holes per leg',1,4,1,'g-holes'],
+  ['hole_offset','First hole (0 = auto)',0,80,0.5,'g-holes'],
+  ['hole_pitch','Hole pitch',8,60,0.5,'g-holes'],
+  ['cbore_depth','Counterbore depth (0 = auto)',0,10,0.5,'g-cbore'],
+  ['tongue_h','Tongue height (0 = lip − 0.2)',0,5,0.1,'g-tongue'],
+  ['tn_ref_len','T-nut length under it (0 = steel)',0,40,0.5,'g-tongue'],
+
+  ['gusset','Inner corner fill',0,1,0.05,'g-plate'],
+  ['outer_cut','Clip outer corner (0 = none)',0,60,0.5,'g-plate'],
+
+  ['arm','Arm length (0 = profile)',0,80,0.5,'g-elbow'],
+  ['bolt_wall','Material under bolt head',3,15,0.5,'g-elbow'],
+  ['key_len','Key length',2,15,0.5,'g-elbow'],
+
+  ['web_len','Web length (0 = 0.6 × leg)',0,100,1,'g-bracket'],
+  ['web_t','Side web thickness',1.5,8,0.5,'g-bracket'],
+
+  ['cap_t','Plate thickness',1.5,12,0.5,'g-cap'],
+  ['cap_edge_s','Edge break size',0,4,0.1,'g-cap'],
+  ['cap_corner_r','Corner radius (0 = profile)',0,10,0.5,'g-cap'],
+  ['cap_oversize','Oversize per side',-1,3,0.1,'g-cap'],
+  ['cap_plug_len','Plug length',0,15,0.5,'g-cap'],
+  ['cap_grip','Plug grip (press fit)',0,0.5,0.05,'g-cap'],
+
+  ['acc_reach','Reach from the face',10,80,1,'g-acc'],
+  ['acc_w','Head width (0 = auto)',0,150,1,'g-acc'],
+  ['acc_t','Arm / shelf thickness',3,12,0.5,'g-acc'],
+  ['acc_tip','Hook tip rise / peg lip',0,30,1,'g-acc'],
+  ['acc_bend_r','Bend radius (inner)',1,20,0.5,'g-acc'],
+  ['acc_n','Features',1,9,1,'g-acc'],
+  ['acc_pitch','Pitch (0 = auto)',0,40,0.5,'g-acc'],
+  ['acc_d','Hole Ø / slot width / gap',3,24,0.5,'g-acc'],
+  ['acc_rib','Rib height (0 = none)',0,40,1,'g-acc'],
+  ['acc_root_r','Root fillet',0,6,0.5,'g-acc'],
+  ['acc_rim','Tray rim height',2,20,0.5,'g-acc'],
+  ['acc_mag_d','Magnet Ø (0 = none)',0,20,0.5,'g-acc'],
+  ['acc_mag_t','Magnet thickness',1,6,0.5,'g-acc'],
+  ['acc_wire_d','Wire Ø / cable thickness',0.5,15,0.1,'g-acc'],
+  ['acc_wire_w','Flat cable width',2,40,0.5,'g-acc'],
+  ['acc_wall','Clip wall',1,5,0.1,'g-acc'],
+  ['acc_snap','Snap lip per side',0,3,0.05,'g-acc'],
+
+  ['sg_w','Width',20,200,1,'g-sign'],
+  ['sg_h','Height',10,120,1,'g-sign'],
+  ['sg_t','Thickness',1.5,10,0.5,'g-sign'],
+  ['sg_corner_r','Corner radius',0,20,0.5,'g-sign'],
+  ['sg_edge_s','Edge break size',0,3,0.1,'g-sign'],
+  ['sg_margin','Hole from the edge (0 = auto)',0,30,0.5,'g-sign'],
+  ['sg_inset','Holes from the ends (0 = centred at pitch)',0,80,0.5,'g-sign'],
+  ['sg_ear_wall','Ear wall around the head',1.5,6,0.5,'g-sign'],
+  ['sg_offset','Slot line from centre (0 = auto)',-60,60,0.5,'g-sign'],
+  ['sg_lip_h','Lip height / groove depth',0.2,3,0.1,'g-sign'],
+  ['sg_lip_w','Lip width',0.6,6,0.2,'g-sign'],
+  ['sg_lip_inset','Lip from the edge',0,10,0.5,'g-sign'],
+
+  ['brand_size','Size (0 = fit the face)',0,100,0.5,'g-brand'],
+  ['brand_depth','Depth / height',0.2,3,0.1,'g-brand'],
+  ['brand_rot','Rotation',-180,180,1,'g-brand'],
+  ['brand_x','Offset X',-60,60,0.5,'g-brand'],
+  ['brand_y','Offset Y',-60,60,0.5,'g-brand'],
+  ['brand_line','Line spacing',0.8,2,0.05,'g-brand2'],
+
+  ['sp_len','Length (0 = auto)',0,200,1,'g-splice'],
+  ['sp_t','Sleeve wall',2,10,0.5,'g-splice'],
+  ['sp_fit','Sleeve fit per side',0,0.5,0.05,'g-splice'],
+
+  ['pv_setback','Member end from pivot (0 = auto)',0,60,0.5,'g-pivot'],
+  ['pv_lug_d','Lug Ø (0 = auto)',0,80,1,'g-pivot'],
+  ['pv_gap','Lug gap (washer)',0,3,0.1,'g-pivot'],
+  ['pv_clear','Pivot bore clearance',0,1,0.05,'g-pivot'],
+  ['pv_range','Arc lock swing',10,170,5,'g-pivot'],
+  ['pv_knob','Knob Ø to seat (0 = none)',0,80,1,'g-pivot'],
+];
+const TOGGLES = ['tn_thread_preview','cbore','tongue','keys','cap_core','brand_bold','brand_dual'];
+const FAMILY_LABEL = { tnut:'T-nut', plate:'Plate', elbow:'Elbow', bracket:'Bracket', cap:'End cap', acc:'Accessory',
+                       sign:'Sign', splice:'Splice', pivot:'Pivot' };
+const RACKS = ['drivers','hexkeys','wrenches','pliers','tray'];
+const ACC_LABEL = { hook:'Hook', peg:'Peg', drivers:'Drivers', hexkeys:'Hex keys', wrenches:'Wrenches',
+                    pliers:'Pliers', tray:'Mag tray', clip:'Wire clip' };
+
+const els = {};
+const state = {};
+let CAT = null;
+
+const msg = document.getElementById('msg');
+const errEl = document.getElementById('err');
+
+/* ---------- panel builders ---------- */
+function slider(key,label,min,max,step,group){
+  const wrap = document.createElement('div');
+  wrap.className = 'ctl'; wrap.id = 'ctl-' + key;
+  wrap.innerHTML =
+    `<div class="row"><label for="c-${key}">${label}</label><output id="o-${key}"></output></div>
+     <input type="range" id="c-${key}" min="${min}" max="${max}" step="${step}">`;
+  document.getElementById(group).appendChild(wrap);
+  const input = wrap.querySelector('input');
+  els[key] = { input, out: wrap.querySelector('output'), step, wrap };
+  input.addEventListener('input', () => {
+    state[key] = parseFloat(input.value);
+    paintValue(key);
+    if (key === 'angle') paintPoly();
+    if (key === 'opening') threadSeg();
+    schedule();
+  });
+}
+function setSlider(key, v){ state[key] = v; els[key].input.value = v; paintValue(key); }
+function paintValue(key){
+  const { input, out, step } = els[key];
+  const v = parseFloat(input.value);
+  out.textContent = Number.isInteger(step) ? v : v.toFixed(step < 0.1 ? 2 : 1);
+}
+function hide(key, yes){ els[key].wrap.classList.toggle('hidden', yes); }
+
+function segmented(id, options, current, onPick){
+  const host = document.getElementById(id);
+  host.innerHTML = '';
+  for (const [val,label,dim] of options){
+    const b = document.createElement('button');
+    b.textContent = label; b.dataset.val = val;
+    if (dim) b.classList.add('dim');
+    if (String(val) === String(current)) b.classList.add('on');
+    b.addEventListener('click', () => {
+      host.querySelectorAll('button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      onPick(val);
+    });
+    host.appendChild(b);
+  }
+}
+function segSet(id, val){
+  document.getElementById(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', String(b.dataset.val) === String(val)));
+}
+function toggle(id, onChange){
+  const t = document.getElementById(id);
+  t.checked = !!state[id];
+  t.addEventListener('change', () => { state[id] = t.checked; onChange && onChange(); schedule(); });
+}
+
+/* ---------- profile ---------- */
+function slot(){ const o = state.opening; return [6,8,10].reduce((a,b) => Math.abs(b-o) < Math.abs(a-o) ? b : a); }
+
+function applyProfile(key){
+  const pr = CAT.profiles[key];
+  state.profile = key;
+  for (const k of CAT.geom_keys) setSlider(k, pr[k]);
+  const n = document.getElementById('profile-note');
+  n.innerHTML = (pr.verified ? '<b>Manufacturer drawing.</b> ' : '<b>Typical figures, unverified.</b> ') + pr.note +
+                ` Core Ø${pr.core} → tap M${pr.tap}. ${pr.kg_m} kg/m.`;
+  threadSeg(true);
+  state.tn_ref_len = 0;
+  setSlider('tn_ref_len', 0);
+}
+
+function threadSeg(reset){
+  const s = slot();
+  const allowed = CAT.slot_threads[String(s)];
+  const opts = CAT.sizes.map(z => [z, 'M' + z, !allowed.includes(z)]);
+  if (reset || !state.thread){
+    const pr = CAT.profiles[state.profile];
+    state.thread = (state.family === 'elbow' || state.family === 'cap') ? pr.tap : CAT.slot_default[String(s)];
+    // a slot-6 bar has no room for an M5 nut under the lips
+    if (state.family === 'splice' && state.sp_kind === 'bar' && s === 6) state.thread = 4;
+  }
+  segmented('seg-thread', opts, state.thread, v => { state.thread = v; paintThreadNote(); schedule(); });
+  paintThreadNote();
+}
+function paintThreadNote(){
+  const s = slot(), n = document.getElementById('thread-note');
+  const st = CAT.steel_nuts[String(s)];
+  if (state.family === 'elbow' || state.family === 'cap'){
+    n.innerHTML = `Bolt into the end-tapped core. Core Ø${state.core} → M${CAT.profiles[state.profile].tap} tap on the preset.`;
+  } else if (state.family === 'splice' && state.sp_kind === 'bar'){
+    n.innerHTML = `Grub screw size; it passes through the ${state.opening} mm slot opening. Slot ${s}: commercial nuts M${CAT.slot_threads[String(s)].join(' M')}.`;
+  } else if (state.family === 'pivot'){
+    n.innerHTML = `Pivot bolt and T-nut bolts share this size. Slot ${s}: commercial nuts M${CAT.slot_threads[String(s)].join(' M')}.`;
+  } else {
+    n.innerHTML = `Slot ${s}: commercial nuts M${CAT.slot_threads[String(s)].join(' M')}. Steel slide-in ref: neck ${st.slide.A}, head ${st.slide.B} × ${st.slide.E}, L ${st.slide.L}.`;
+  }
+}
+
+/* ---------- material ---------- */
+function applyMaterial(m){
+  state.material = m;
+  const c = CAT.materials[m];
+  setSlider('clear_hex', c.hex); setSlider('clear_depth', c.depth); setSlider('clear_wide', c.wide);
+  setSlider('clear_neck', c.neck); setSlider('clear_hole', c.hole); setSlider('clear_thread', c.thread);
+}
+
+/* ---------- family visibility ---------- */
+function showFamily(f){
+  state.family = f;
+  document.querySelectorAll('.group.fam').forEach(g => g.classList.add('hidden'));
+  const show = id => document.getElementById(id).classList.remove('hidden');
+  if (f === 'tnut'){ show('grp-tnut'); }
+  else if (f === 'cap'){ show('grp-cap'); show('grp-brand'); }
+  else if (f === 'sign'){ show('grp-sign'); show('grp-brand'); }
+  else { show('grp-joint'); }
+  if (['plate','bracket','acc','splice','pivot'].includes(f)) show('grp-holes');
+  if (f === 'plate') show('grp-plate');
+  if (f === 'elbow') show('grp-elbow');
+  if (f === 'bracket') show('grp-bracket');
+  if (f === 'acc') show('grp-acc');
+  if (f === 'splice') show('grp-splice');
+  if (f === 'pivot') show('grp-pivot');
+  document.getElementById('lbl-ends').classList.toggle('hidden', f !== 'plate');
+  document.getElementById('seg-ends').classList.toggle('hidden', f !== 'plate');
+  // the joint group doubles as the base plate (accessory) and the members (splice)
+  const acc = f === 'acc', splice = f === 'splice';
+  for (const id of ['lbl-poly','seg-poly','poly-note','ctl-angle'])
+    document.getElementById(id).classList.toggle('hidden', acc || splice);
+  for (const k of ['thick','width','leg']) hide(k, splice);
+  document.getElementById('h-joint').textContent = acc ? 'Base plate' : (splice ? 'Members' : (f === 'pivot' ? 'Joint · leaves' : 'Joint'));
+  els.leg.wrap.querySelector('label').textContent = acc ? 'Base length (0 = auto)' : 'Leg length (0 = auto)';
+  els.thick.wrap.querySelector('label').textContent = acc ? 'Base thickness' : (f === 'pivot' ? 'Leaf thickness' : 'Thickness');
+  els.width.wrap.querySelector('label').textContent = acc ? 'Base width (0 = profile)' : 'Width (0 = profile)';
+  els.holes.wrap.querySelector('label').textContent = splice ? 'Bolts per side' : (f === 'sign' ? 'Bolts' : 'Holes per leg');
+  document.querySelector('#grp-holes label.toggle:nth-of-type(2) span:last-child').textContent =
+    splice ? 'Slot keys (sleeve)' : 'Slot tongue (shear + alignment)';
+  const nm = document.getElementById('name');
+  if (['part','tnut','plate','elbow','bracket','cap','acc','sign','splice','pivot'].includes(nm.value)) nm.value = f;
+  threadSeg(true);
+  paintTnut();
+  paintCap();
+  paintAcc();
+  paintSign();
+  paintBrand();
+  paintSplice();
+  paintPivot();
+}
+
+function paintSign(){
+  if (state.family !== 'sign') return;
+  const bolts = state.sg_mount === 'bolts', ears = state.sg_holes === 'ears';
+  const where = state.sg_where, sides = where === 'sides', both = where === 'both';
+  document.getElementById('grp-holes').classList.toggle('hidden', !bolts);
+  for (const id of ['lbl-sgholes','seg-sgholes','lbl-sgwhere','seg-sgwhere']) document.getElementById(id).classList.toggle('hidden', !bolts);
+  hide('sg_margin', !(bolts && !ears && !sides));
+  hide('sg_inset', !(bolts && !(sides && ears)));
+  hide('sg_ear_wall', !(bolts && ears));
+  hide('sg_offset', !(bolts && !both && (sides || !ears)));
+  els.sg_inset.wrap.querySelector('label').textContent = sides ? 'Bolts from the ends (0 = auto)' : 'Holes from the ends (0 = centred at pitch)';
+  els.sg_offset.wrap.querySelector('label').textContent = sides ? 'Rail from the centre line' : 'Slot line from centre (0 = auto)';
+  for (const k of ['holes','hole_offset','hole_pitch']) hide(k, sides);
+  hide('sg_edge_s', state.sg_edge === 'none');
+  for (const k of ['sg_lip_h','sg_lip_w','sg_lip_inset']) hide(k, state.sg_lip === 'none');
+  // the slot tongue only exists for holes in the plate
+  document.getElementById('tongue').parentElement.classList.toggle('hidden', ears);
+  document.getElementById('g-tongue').classList.toggle('hidden', ears);
+  els.hole_pitch.wrap.querySelector('label').textContent = 'Hole pitch (when centred)';
+}
+
+function paintBrand(){
+  const src = state.brand_src, sign = state.family === 'sign';
+  document.getElementById('brand-text-box').classList.toggle('box-hidden', src !== 'text');
+  document.getElementById('brand-svg-box').classList.toggle('box-hidden', src !== 'svg');
+  document.getElementById('lbl-brandmode').classList.toggle('hidden', src === 'none');
+  document.getElementById('seg-brandmode').classList.toggle('hidden', src === 'none');
+  document.getElementById('g-brand').classList.toggle('hidden', src === 'none');
+  document.getElementById('g-brand2').classList.toggle('hidden', src === 'none');
+  for (const id of ['lbl-brandalign','seg-brandalign','brand-centre'])
+    document.getElementById(id).classList.toggle('hidden', src === 'none' || !sign);
+  document.getElementById('tg-dual').classList.toggle('hidden', src === 'none');
+  const dn = document.getElementById('dual-note');
+  dn.classList.toggle('hidden', src === 'none' || !state.brand_dual);
+  dn.innerHTML = {
+    recess: '<b>Flush inlay.</b> The base gets the pocket, the brand part fills it. ',
+    emboss: '<b>Raised letters</b> as their own part standing on the face. ',
+    through: '<b>Through insert</b>: the brand part runs through the whole plate, visible on both sides. ',
+  }[state.brand_mode] + 'Export gives one 3MF object with two parts: in Bambu Studio right-click the brand part → Change filament. The preview shows it in orange.';
+  hide('brand_line', src !== 'text');
+  els.brand_size.wrap.querySelector('label').textContent = src === 'svg' ? 'Longest side (0 = fit the face)' : 'Text height (0 = fit the face)';
+}
+
+function paintSplice(){
+  const bar = state.family === 'splice' && state.sp_kind === 'bar';
+  for (const id of ['lbl-spfaces','seg-spfaces']) document.getElementById(id).classList.toggle('hidden', bar);
+  for (const id of ['lbl-spfix','seg-spfix']) document.getElementById(id).classList.toggle('hidden', !bar);
+  document.getElementById('seg-spnut').classList.toggle('hidden', !(bar && state.sp_fix === 'hex'));
+  hide('sp_t', bar); hide('sp_fit', bar);
+  document.getElementById('cbore').parentElement.classList.toggle('hidden', bar);
+  document.getElementById('tongue').parentElement.classList.toggle('hidden', bar);
+  document.getElementById('g-cbore').classList.toggle('hidden', bar);
+  document.getElementById('g-tongue').classList.toggle('hidden', bar);
+  document.getElementById('splice-note').innerHTML = bar
+    ? '<b>Slot bar.</b> A long slide-in T-nut body across the joint, one per slot. Grub screws (the bolt size above) reach through the opening, press the cavity floor and jam the bar under the lips. Nuts load from below with a snap lip.'
+    : '<b>Sleeve.</b> Wraps both members across the joint. Keys ride in the slot openings; bolts go into slide-in T-nuts on every covered face (slide them in from the ends first).';
+}
+
+function paintPivot(){
+  hide('pv_range', state.pv_lock !== 'arc');
+  document.getElementById('pivot-note').innerHTML =
+    '<b>Leaf A</b> (member 1) carries the lower lug with the nut captive underneath; <b>leaf B</b> steps over it to the upper lug. ' +
+    'Bolt or knob from the top: tighten for friction, or add the <b>arc lock</b> for a second bolt in a slot. ' +
+    'Export each leaf on its own to print.';
+}
+
+function paintCap(){
+  const plugs = state.cap_plug !== 'none' || state.cap_core;
+  hide('cap_edge_s', state.cap_edge === 'none');
+  hide('cap_plug_len', !plugs);
+  hide('cap_grip', !plugs);
+}
+
+function paintAcc(){
+  const ty = state.acc_type, rack = RACKS.includes(ty), clip = ty === 'clip', tray = ty === 'tray';
+  hide('acc_tip', rack || clip);
+  hide('acc_bend_r', ty !== 'hook');
+  hide('acc_n', !((rack && !tray) || clip));
+  hide('acc_pitch', !(rack || clip));
+  hide('acc_d', !['drivers','wrenches','pliers'].includes(ty));
+  hide('acc_root_r', rack || clip);
+  hide('acc_rib', clip || tray);
+  hide('acc_reach', clip);
+  hide('acc_rim', !tray); hide('acc_mag_d', !tray); hide('acc_mag_t', !tray);
+  hide('acc_wire_d', !clip); hide('acc_wire_w', !(clip && state.acc_wire === 'flat'));
+  hide('acc_wall', !clip); hide('acc_snap', !(clip && state.acc_clip === 'snap'));
+  for (const id of ['lbl-accwire','seg-accwire','seg-accclip']) document.getElementById(id).classList.toggle('hidden', !clip);
+  els.acc_t.wrap.querySelector('label').textContent = clip ? 'Clip length (along the wire)' : (tray ? 'Floor thickness' : 'Arm / shelf thickness');
+  els.acc_pitch.wrap.querySelector('label').textContent = tray ? 'Magnet pitch (0 = auto)' : 'Pitch (0 = auto)';
+  els.acc_w.wrap.querySelector('label').textContent = tray ? 'Tray width (0 = auto)' : 'Head width (0 = auto)';
+  els.acc_reach.wrap.querySelector('label').textContent = tray ? 'Tray depth from the face' : 'Reach from the face';
+  const n = document.getElementById('acc-note');
+  const where = state.acc_turn === 'along'
+    ? 'Head points along the slot: a vertical member, bolts below the head.'
+    : 'Head points across the slot: a horizontal member with the slot facing you.';
+  const what = {
+    hook: 'J-hook, full base width by default, rib under the arm, cove at the root.',
+    peg: 'Straight bar with a stop lip at the end.',
+    drivers: 'Shelf with round holes; tools hang through them.',
+    hexkeys: 'Shelf with one hole per key size, 1.5 mm upward.',
+    wrenches: 'Comb: open slots from the front edge, handles drop in.',
+    pliers: 'Shelf with one long window: handles drop through, jaws rest on the rails. Gap = handle thickness.',
+    tray: 'Rimmed tray; magnets drop into top pockets (Ø + 0.3, depth + 0.2) so bits and screws stay put.',
+    clip: 'Wire block: snap-in C channels, closed loops or an open comb; round wires or flat cable, any count.',
+  }[ty];
+  n.innerHTML = `<b>${what}</b> ${where}`;
+}
+
+function paintTnut(){
+  const slide = state.tn_type === 'slide', fix = state.tn_fix;
+  hide('tn_len', !slide);
+  hide('tn_neck', !slide); hide('tn_neck_len', !slide); hide('tn_lead', !slide);
+  hide('tn_boss', slide);
+  document.getElementById('seg-nut').classList.toggle('hidden', fix !== 'hex');
+  document.getElementById('seg-load').classList.toggle('hidden', fix !== 'hex');
+  document.getElementById('lbl-load').classList.toggle('hidden', fix !== 'hex');
+  hide('tn_floor', !(fix === 'hex' && state.tn_load === 'end'));
+  hide('tn_corner_r', fix !== 'hex');
+  hide('tn_retain', !(fix === 'hex' && state.tn_load === 'bottom'));
+  hide('tn_insert_len', fix !== 'insert');
+  document.getElementById('tg-threadprev').classList.toggle('hidden', fix !== 'thread');
+}
+
+function paintPoly(){
+  const th = state.angle, n = document.getElementById('poly-note');
+  const turn = 180 - th, half = turn / 2;
+  const tan = Math.tan(half * Math.PI / 180);
+  const ex = (state.size * tan).toFixed(1);
+  const poly = Math.round(360 / turn);
+  const isPoly = Math.abs(360 / turn - poly) < 1e-6 && poly >= 3;
+  segSet('seg-poly', isPoly ? poly : 'x');
+  if (th >= 179.5) n.innerHTML = 'Straight splice: both members square-cut.';
+  else n.innerHTML = `${isPoly ? poly + '-gon. ' : ''}Mitre each member <b>${half.toFixed(1)}°</b> from square. ` +
+    `Outer edge = L + ${ex}, inner edge = L − ${ex} (L = centreline side, ${state.size} profile).`;
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+  const j = await (await fetch('/defaults')).json();
+  CAT = j.catalog;
+  const d = j.defaults;
+  for (const row of CONTROLS) slider(...row);
+  for (const [key] of CONTROLS) setSlider(key, d[key]);
+  for (const k of ['profile','material','family','thread','tn_type','tn_fix','tn_nut','tn_load','ends','z_arm','web',
+                   'br_rot','cap_edge','cap_plug','cap_hole','acc_type','acc_turn','acc_wire','acc_clip',
+                   'brand_src','brand_text','brand_font','brand_mode','brand_svg','brand_align','sg_edge','sg_mount',
+                   'sg_holes','sg_where','sg_lip','sp_kind','sp_faces','sp_fix','pv_part','pv_lock'])
+    state[k] = d[k];
+  for (const k of TOGGLES) state[k] = d[k];
+
+  const sel = document.getElementById('profile');
+  for (const k of CAT.profile_order){
+    const o = document.createElement('option'); o.value = k; o.textContent = CAT.profiles[k].label;
+    if (k === d.profile) o.selected = true;
+    sel.appendChild(o);
+  }
+  sel.addEventListener('change', () => { applyProfile(sel.value); schedule(); });
+  applyProfile(d.profile);
+
+  segmented('seg-material', Object.entries(CAT.materials).map(([k,v]) => [k, v.label]), d.material,
+            v => { applyMaterial(v); schedule(); });
+  segmented('seg-family', CAT.families.map(f => [f, FAMILY_LABEL[f] || f]), d.family, v => { showFamily(v); schedule(); });
+  segmented('seg-tntype', [['slide','Slide-in'],['drop','Drop-in']], d.tn_type, v => { state.tn_type = v; paintTnut(); schedule(); });
+  segmented('seg-fix', [['hex','Hex nut'],['thread','Thread'],['insert','Insert'],['plain','Bore']], d.tn_fix,
+            v => { state.tn_fix = v; paintTnut(); schedule(); });
+  segmented('seg-nut', Object.entries(CAT.nuts).map(([k,v]) => [k, v.replace('Hex nut ','').replace('Thin nut ','thin ')]), d.tn_nut,
+            v => { state.tn_nut = v; segSet('seg-spnut', v); segSet('seg-pvnut', v); schedule(); });
+  segmented('seg-load', [['bottom','Bottom (strongest)'],['end','End (captive)']], d.tn_load, v => { state.tn_load = v; paintTnut(); schedule(); });
+  segmented('seg-poly', [[3,'△'],[4,'□'],[5,'5'],[6,'6'],[8,'8'],[12,'12'],['x','·']], 4, v => {
+    if (v === 'x') return;
+    setSlider('angle', (v - 2) * 180 / v); paintPoly(); schedule();
+  });
+  segmented('seg-ends', [['mitre','Mitred'],['square','Square / butt']], d.ends, v => { state.ends = v; schedule(); });
+  segmented('seg-zarm', [['none','None'],['up','Up'],['down','Down']], d.z_arm, v => { state.z_arm = v; schedule(); });
+  segmented('seg-web', [['none','None'],['sides','Sides'],['full','Full']], d.web, v => { state.web = v; schedule(); });
+  segmented('seg-notch', [['keyed','Keyed (tongue)'],['flat','Flat']], d.tongue ? 'keyed' : 'flat', v => {
+    state.tongue = v === 'keyed'; document.getElementById('tongue').checked = state.tongue; schedule();
+  });
+  segmented('seg-rot', [[0,'0°'],[90,'90°'],[180,'180°'],[270,'270°']], d.br_rot, v => { state.br_rot = v; schedule(); });
+
+  segmented('seg-capedge', [['none','Square'],['chamfer','Chamfer'],['fillet','Fillet']], d.cap_edge,
+            v => { state.cap_edge = v; paintCap(); schedule(); });
+  segmented('seg-capplug', [['none','None'],['keys','Keys (lips)'],['tee','Tee (cavity)']], d.cap_plug,
+            v => { state.cap_plug = v; paintCap(); schedule(); });
+  segmented('seg-caphole', [['none','None'],['plain','Plain'],['cbore','C-bore'],['csk','C-sunk']], d.cap_hole,
+            v => { state.cap_hole = v; schedule(); });
+  segmented('seg-acctype', (CAT.acc_types || Object.keys(ACC_LABEL)).map(k => [k, ACC_LABEL[k] || k]),
+            d.acc_type, v => { state.acc_type = v; paintAcc(); schedule(); });
+  segmented('seg-accturn', [['along','Along the slot'],['across','Across the slot']], d.acc_turn,
+            v => { state.acc_turn = v; paintAcc(); schedule(); });
+  segmented('seg-accwire', [['round','Round wire'],['flat','Flat cable']], d.acc_wire, v => { state.acc_wire = v; paintAcc(); schedule(); });
+  segmented('seg-accclip', [['snap','Snap C'],['loop','Closed loop'],['comb','Open comb']], d.acc_clip, v => { state.acc_clip = v; paintAcc(); schedule(); });
+
+  segmented('seg-sgmount', [['none','None'],['bolts','T-nut bolts'],['slot','Slot edge key']], d.sg_mount,
+            v => { state.sg_mount = v; paintSign(); schedule(); });
+  segmented('seg-sgedge', [['none','Square'],['chamfer','Chamfer'],['fillet','Fillet']], d.sg_edge,
+            v => { state.sg_edge = v; paintSign(); schedule(); });
+  segmented('seg-sglip', [['none','No lip'],['raised','Raised rim'],['groove','Groove']], d.sg_lip,
+            v => { state.sg_lip = v; paintSign(); schedule(); });
+  segmented('seg-sgholes', [['inside','In the plate'],['ears','Ears outside the edge']], d.sg_holes,
+            v => { state.sg_holes = v; paintSign(); schedule(); });
+  segmented('seg-sgwhere', [['bottom','Bottom edge'],['sides','Sides · full face'],['both','Top + bottom']], d.sg_where,
+            v => { state.sg_where = v; paintSign(); schedule(); });
+  segmented('seg-brandalign', [['band','Free band (clear of heads)'],['centre','Plate centre']], d.brand_align,
+            v => { state.brand_align = v; schedule(); });
+  document.getElementById('brand-centre').addEventListener('click', () => {
+    setSlider('brand_x', 0); setSlider('brand_y', 0);
+    state.brand_align = 'centre'; segSet('seg-brandalign', 'centre');
+    schedule();
+  });
+
+  segmented('seg-brandsrc', [['none','None'],['text','Text'],['svg','SVG file']], d.brand_src,
+            v => { state.brand_src = v; paintBrand(); schedule(); });
+  segmented('seg-brandmode', [['recess','Recessed'],['emboss','Raised'],['through','Cut through']], d.brand_mode,
+            v => { state.brand_mode = v; paintBrand(); schedule(); });
+  const ta = document.getElementById('brand_text');
+  ta.value = d.brand_text;
+  ta.addEventListener('input', () => { state.brand_text = ta.value; schedule(500); });
+  const fsel = document.getElementById('brand_font');
+  for (const [k, label] of Object.entries(CAT.fonts || {})){
+    const o = document.createElement('option'); o.value = k; o.textContent = label;
+    if (k === d.brand_font) o.selected = true;
+    fsel.appendChild(o);
+  }
+  fsel.addEventListener('change', () => { state.brand_font = fsel.value; schedule(); });
+  document.getElementById('brand_file').addEventListener('change', async ev => {
+    const f = ev.target.files[0];
+    if (!f) return;
+    const n = document.getElementById('svg-note');
+    n.textContent = 'Uploading ' + f.name + '…';
+    try{
+      const res = await fetch('/svg', { method:'POST', headers:{'Content-Type':'image/svg+xml'}, body: await f.text() });
+      const j = await res.json();
+      if (!res.ok){ n.innerHTML = '<b>' + (j.errors || ['Upload failed']).join(' ') + '</b>'; return; }
+      state.brand_svg = j.key;
+      n.innerHTML = `<b>${f.name}</b> · ${j.paths} outline${j.paths === 1 ? '' : 's'}, ${j.w.toFixed(0)} × ${j.h.toFixed(0)} units. Scaled to fit; set a size to pin it.`;
+      if (state.brand_src !== 'svg'){ state.brand_src = 'svg'; segSet('seg-brandsrc', 'svg'); paintBrand(); }
+      schedule();
+    }catch(e){ n.innerHTML = '<b>Upload failed: server unreachable.</b>'; }
+  });
+
+  segmented('seg-spkind', [['sleeve','Sleeve'],['bar','Slot bar']], d.sp_kind, v => { state.sp_kind = v; paintSplice(); threadSeg(true); schedule(); });
+  segmented('seg-spfaces', [[1,'1 · plate'],[2,'2 · L'],[3,'3 · U'],[4,'4 · box']], d.sp_faces, v => { state.sp_faces = v; schedule(); });
+  segmented('seg-spfix', [['hex','Captive hex nut'],['thread','Printed thread']], d.sp_fix, v => { state.sp_fix = v; paintSplice(); schedule(); });
+  segmented('seg-spnut', Object.entries(CAT.nuts).map(([k,v]) => [k, v.replace('Hex nut ','').replace('Thin nut ','thin ')]), d.tn_nut,
+            v => { state.tn_nut = v; segSet('seg-nut', v); segSet('seg-pvnut', v); schedule(); });
+
+  segmented('seg-pvpart', [['both','Both (assembled)'],['a','Leaf A'],['b','Leaf B']], d.pv_part, v => { state.pv_part = v; schedule(); });
+  segmented('seg-pvlock', [['none','Friction (knob)'],['arc','Arc slot + bolt']], d.pv_lock, v => { state.pv_lock = v; paintPivot(); schedule(); });
+  segmented('seg-pvnut', Object.entries(CAT.nuts).map(([k,v]) => [k, v.replace('Hex nut ','').replace('Thin nut ','thin ')]), d.tn_nut,
+            v => { state.tn_nut = v; segSet('seg-nut', v); segSet('seg-spnut', v); schedule(); });
+
+  toggle('tn_thread_preview'); toggle('cbore'); toggle('keys'); toggle('brand_bold');
+  toggle('brand_dual', paintBrand);
+  toggle('tongue', () => segSet('seg-notch', state.tongue ? 'keyed' : 'flat'));
+  toggle('cap_core', paintCap);
+  const sc = document.getElementById('showctx');
+  sc.addEventListener('change', () => { if (ctxMesh) ctxMesh.visible = sc.checked; if (ctxEdges) ctxEdges.visible = sc.checked; });
+
+  showFamily(d.family);
+  paintPoly();
+  rebuild();
+}
+
+/* ---------- three.js ---------- */
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+const camera = new THREE.PerspectiveCamera(38, 1, 1, 5000);
+camera.position.set(60,-70,55); camera.up.set(0,0,1);
+const controls = new OrbitControls(camera, canvas); controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0xbbbbbb, 2.1));
+const keyL = new THREE.DirectionalLight(0xffffff, 2.0); keyL.position.set(1,-1.4,2); scene.add(keyL);
+const fill = new THREE.DirectionalLight(0xffffff, 0.7); fill.position.set(-1.2,0.8,0.4); scene.add(fill);
+
+const material = new THREE.MeshStandardMaterial({ color:0x0000ff, metalness:0.0, roughness:0.62 });
+const brandMaterial = new THREE.MeshStandardMaterial({ color:0xff6a00, metalness:0.0, roughness:0.62 });
+const ctxMaterial = new THREE.MeshStandardMaterial({ color:0xdddddd, metalness:0.0, roughness:0.9, transparent:true, opacity:0.55 });
+const edgeMat = new THREE.LineBasicMaterial({ color:0x000000 });
+const ctxEdgeMat = new THREE.LineBasicMaterial({ color:0x000000, transparent:true, opacity:0.35 });
+
+let mesh = null, edges = null, ctxMesh = null, ctxEdges = null;
+const loader = new STLLoader();
+let offset = new THREE.Vector3();
+let lastSize = 0;
+
+function resize(){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (canvas.width !== w || canvas.height !== h){ renderer.setSize(w,h,false); camera.aspect = w/h; camera.updateProjectionMatrix(); }
+}
+function tick(){ resize(); controls.update(); renderer.render(scene,camera); requestAnimationFrame(tick); }
+tick();
+
+function showPart(buffer, firstLoad, brandTris){
+  const geo = loader.parse(buffer);
+  geo.computeVertexNormals(); geo.computeBoundingBox();
+  geo.boundingBox.getCenter(offset);
+  geo.translate(-offset.x,-offset.y,-offset.z);
+  if (mesh){ scene.remove(mesh); mesh.geometry.dispose(); }
+  if (edges){ scene.remove(edges); edges.geometry.dispose(); }
+  const nv = geo.getAttribute('position').count;
+  if (brandTris > 0){
+    // the server appends the second-filament body after the base triangles
+    const nb = brandTris * 3;
+    geo.clearGroups();
+    geo.addGroup(0, nv - nb, 0);
+    geo.addGroup(nv - nb, nb, 1);
+    mesh = new THREE.Mesh(geo, [material, brandMaterial]);
+  } else {
+    mesh = new THREE.Mesh(geo, material);
+  }
+  scene.add(mesh);
+  edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 24), edgeMat); scene.add(edges);
+  if (ctxMesh) ctxMesh.position.copy(offset).negate();
+  if (ctxEdges) ctxEdges.position.copy(offset).negate();
+  const s = geo.boundingBox.getSize(new THREE.Vector3()).length();
+  if (firstLoad || s > lastSize * 1.35 || s < lastSize / 1.35){
+    camera.position.set(s*1.1,-s*1.2,s*0.9); controls.target.set(0,0,0);
+  }
+  lastSize = s;
+}
+function showCtx(buffer){
+  const geo = loader.parse(buffer);
+  geo.computeVertexNormals();
+  if (ctxMesh){ scene.remove(ctxMesh); ctxMesh.geometry.dispose(); }
+  if (ctxEdges){ scene.remove(ctxEdges); ctxEdges.geometry.dispose(); }
+  ctxMesh = new THREE.Mesh(geo, ctxMaterial); ctxMesh.renderOrder = 1;
+  ctxEdges = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 30), ctxEdgeMat);
+  ctxMesh.position.copy(offset).negate(); ctxEdges.position.copy(offset).negate();
+  const on = document.getElementById('showctx').checked;
+  ctxMesh.visible = on; ctxEdges.visible = on;
+  scene.add(ctxMesh); scene.add(ctxEdges);
+}
+
+/* ---------- request cycle ---------- */
+let pending = null, inFlight = false, first = true, ctxKey = null;
+
+function schedule(ms){ clearTimeout(pending); pending = setTimeout(rebuild, ms || 180); }
+
+const BUILD_TIMEOUT = 120000;   // ms: a boolean that never returns must not freeze the page
+
+function setStale(on, invalid){
+  // the mesh on screen no longer matches the sliders: dim it until a fresh build lands
+  for (const mt of [material, brandMaterial]){
+    mt.transparent = on;
+    mt.opacity = on ? (invalid ? 0.3 : 0.6) : 1.0;
+    mt.needsUpdate = true;
+  }
+}
+
+async function rebuild(){
+  if (inFlight){ schedule(); return; }
+  inFlight = true;
+  msg.textContent = 'Building'; msg.classList.add('busy');
+  setStale(true, false);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), BUILD_TIMEOUT);
+  let dirty = false;
+  try{
+    const res = await fetch('/preview.stl?' + new URLSearchParams(state), { signal: ctrl.signal });
+    if (!res.ok){
+      let errs = ['Build failed'];
+      try{ errs = (await res.json()).errors || errs; }catch(e){}
+      errEl.textContent = errs.join(' / ');
+      msg.textContent = 'Invalid parameters · the part shown is the last valid one';
+      setStale(true, true);
+      return;
+    }
+    const stats = JSON.parse(res.headers.get('X-Stats'));
+    errEl.textContent = (stats.warnings || []).join(' / ');
+    const buf = await res.arrayBuffer();
+    showPart(buf, first, stats.brand_tris || 0); first = false;
+    setStale(false, false);
+    paintStats(stats);
+    if (stats.context_key !== ctxKey){
+      if (ctxMesh){ ctxMesh.visible = false; ctxEdges.visible = false; }
+      const c = await fetch('/context.stl?' + new URLSearchParams(state), { signal: ctrl.signal });
+      if (c.ok){ showCtx(await c.arrayBuffer()); ctxKey = stats.context_key; }
+      else { ctxKey = null; }                      // retry with the next build instead of staying blank
+    }
+    msg.textContent = 'Ready · ' + stats.derived.print;
+    dirty = true;
+  }catch(e){
+    errEl.textContent = e.name === 'AbortError'
+      ? 'Build timed out after 2 min; the server may still be busy with it. Try a simpler setting.'
+      : 'Server unreachable';
+    msg.textContent = 'Error';
+  }finally{
+    clearTimeout(timer);
+    msg.classList.remove('busy');
+    inFlight = false;
+  }
+}
+
+function paintStats(s){
+  const b = s.part.bbox, d = s.derived;
+  document.getElementById('r-env').textContent = `${b[0]}×${b[1]}×${b[2]}`;
+  document.getElementById('r-vol').textContent = `${s.part.volume.toFixed(1)} cm³`;
+  for (let i = 1; i <= 5; i++){
+    const c = d.cells[i-1];
+    document.getElementById('l-'+i).textContent = c ? c[0] : '·';
+    const dd = document.getElementById('r-'+i);
+    dd.textContent = c ? c[1] : '—';
+    dd.classList.toggle('warn', !!(c && c[2]));
+  }
+  document.getElementById('limit').textContent = d.limit;
+}
+
+/* ---------- export ---------- */
+document.getElementById('go').addEventListener('click', () => {
+  const name = document.getElementById('name').value || 'part';
+  window.location = '/export?' + new URLSearchParams({ ...state, name });
+});
+
+boot();
+</script>
+</body>
+</html>

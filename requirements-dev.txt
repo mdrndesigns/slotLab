@@ -1,0 +1,4 @@
+-r requirements.txt
+trimesh
+numpy
+matplotlib

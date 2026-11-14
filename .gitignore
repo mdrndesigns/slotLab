@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor / OS / tooling
+.DS_Store
+.vscode/
+.idea/
+.claude/
+
+# Generated sample geometry (regenerate with: python3 tests/samples.py)
+samples/*.stl
+samples/*.step
+samples/*.3mf
